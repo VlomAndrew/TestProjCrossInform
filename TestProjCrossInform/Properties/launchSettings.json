@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TestProjCrossInform": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\andre\\OneDrive\\Документы\\Projects\\TestProjCrossInform\\TestProjCrossInform\\text.txt"
+    }
+  }
+}
