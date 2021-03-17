@@ -75,7 +75,7 @@ namespace TestProjCrossInform
             }
 
             sw.Stop();
-            Console.WriteLine(sw.ElapsedMilliseconds.ToString()+" милисекундс");
+            Console.WriteLine("\n"+sw.ElapsedMilliseconds.ToString()+" милисекундс");
         }
     }
 }
