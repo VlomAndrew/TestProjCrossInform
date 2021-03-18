@@ -15,8 +15,7 @@ namespace TestProjCrossInform
 
         private static void Main(string[] args)
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
+            
             if (args.Length < 1)
             {
                 Console.WriteLine("Файл не подан через командную строку");
@@ -31,63 +30,42 @@ namespace TestProjCrossInform
                 return;
             }
 
-            //Task<IEnumerable<string>> task1 = new Task<IEnumerable<string>>(() =>
-            //{
-            //    var inputWords = File.ReadAllLines(fileName)
-            //        .SelectMany(l => l.Split(' ', StringSplitOptions.RemoveEmptyEntries));
-
-            //    var resultWords = UtilityClass.SelectWords(inputWords);
-            //    Thread.Sleep(10000);
-            //    return resultWords;
-            //});
-
-            //task1.Start();
-
-
-
-            //Console.WriteLine(String.Join(",", task1.Result));
-
-            using (StreamReader sr = new StreamReader(fileName))
+            var tokenSource = new CancellationTokenSource();
+            var token = tokenSource.Token;
+            Task task1 = new Task(() => UtilityClass.Run(fileName,token));
+            task1.Start();
+            try
             {
-                char symbol;
-                string word = String.Empty;
-                Dictionary<string, int> wordsAndCount = new Dictionary<string, int>();
-                while (!sr.EndOfStream)
+                do
                 {
-                    while ((symbol = (char)sr.Read()) != ' ')
-                    {
-                        if (!UtilityClass.speshialSymbols.Contains(symbol))
-                            word += symbol.ToString();
-                        if (sr.EndOfStream) break;
-                    }
+                    var c = Console.ReadKey(true);
+                    if(task1.IsCompleted) break;
+                    tokenSource.Cancel();
+                } while (task1.IsCompleted && !task1.IsCanceled);
 
-                    if (!String.IsNullOrEmpty(word))
-                    {
-                        if (UtilityClass.IsRepeate(word, 3))
-                        {
-                            if (!wordsAndCount.TryAdd(word, 1))
-                            {
-                                wordsAndCount[word] += 1;
-                            }
-                        }
-
-                        word = string.Empty;
-                    }
-
-                }
-
-                List<KeyValuePair<string, int>> listOfWordsAndCount = wordsAndCount.ToList();
-                listOfWordsAndCount.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
-                listOfWordsAndCount.Take(10);
-                var res =
-                    from w in listOfWordsAndCount
-                    select w.Key;
-                Console.WriteLine(String.Join(',', res));
+                task1.Wait();
             }
 
-            sw.Stop();
-            Console.WriteLine(sw.ElapsedMilliseconds.ToString() + " милисекунд");
-        }
 
+            catch (AggregateException ae)
+            {
+                foreach (Exception e in ae.InnerExceptions)
+                {
+                    if (e is TaskCanceledException)
+                        Console.WriteLine("Unable to compute mean: {0}",
+                            ((TaskCanceledException) e).Message);
+                    else
+                        Console.WriteLine("Exception: " + e.GetType().Name);
+                }
+            }
+
+
+            
+
+
+
+                
+            }
+
+        }
     }
-}
