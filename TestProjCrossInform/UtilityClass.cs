@@ -5,6 +5,7 @@ namespace TestProjCrossInform
 {
     public class UtilityClass
     {
+        public static List<char> speshialSymbols = new List<char>{'\n','\t','\r', '\a','\b','\f','\v','\0' };
         public static IEnumerable<string> SelectWords(IEnumerable<string> words, int charLimit = 3, int wordLimit = 10)
         {
             var result =
@@ -14,8 +15,10 @@ namespace TestProjCrossInform
                 orderby g.Count() descending
                 select g.Key;
 
+            var res = words.AsParallel().AsOrdered().GroupBy(w => w).Where(w => IsRepeate(w.Key, charLimit)).OrderByDescending(w => w.Count())
+                .Select(w => w.Key);
 
-            return result.Take(wordLimit);
+            return res.Take(wordLimit);
         }
 
         public static bool IsRepeate(string word, int charLimit)
